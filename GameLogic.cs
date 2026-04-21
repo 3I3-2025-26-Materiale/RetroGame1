@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace RetroGameFramework
 {
@@ -6,15 +7,14 @@ namespace RetroGameFramework
     {
         public GameLogic(GameConfig GameConfig) : base(GameConfig) { }
 
-
+        // GameConfig is a variable already accessible in methods to retrieve the game configs
+        // bool IsPaused() is a function already accessible in methods to check if the game is paused
+        // void SetPaused(bool) is a function already accessible in methods to set the game in pause and to resume it
 
         // GAME DATA
         // Declare here game-specific data that should survive the frame
-        // GameConfig is already accessible in methods
         float[] ballPosition; // ball position in screen pixels
         float[] ballSpeed; // ball speed in pixels per frame
-
-
 
         // Initialization call, used to customize GameConfig data (used to customize the engine behaviour)
         protected override void OnInitGameConfig(GameConfig GameConfig)
@@ -129,6 +129,54 @@ namespace RetroGameFramework
             {
                 pixels[posX, posY] = color;
             }
+        }
+
+        // Called the first frame a key is pressed, and not called anymore unless the key is released
+        protected override void OnKeyDown(Keys KeyCode)
+        {
+            if (!IsPaused())
+            {
+                float[] ballSpeedAbs = new float[] { Math.Abs(ballSpeed[0]), Math.Abs(ballSpeed[1]) };
+                if (KeyCode == Keys.Up || KeyCode == Keys.W)
+                {
+                    ballSpeed[1] = -ballSpeedAbs[1];
+                }
+                else if (KeyCode == Keys.Down || KeyCode == Keys.S)
+                {
+                    ballSpeed[1] = ballSpeedAbs[1];
+                }
+                else if (KeyCode == Keys.Right || KeyCode == Keys.D)
+                {
+                    ballSpeed[0] = ballSpeedAbs[0];
+                }
+                else if (KeyCode == Keys.Left || KeyCode == Keys.A)
+                {
+                    ballSpeed[0] = -ballSpeedAbs[0];
+                }
+                else if (KeyCode == Keys.P)
+                {
+                    SetPaused(true);
+                }
+            }
+            else
+            {
+                if (KeyCode == Keys.P)
+                {
+                    SetPaused(false);
+                }
+            }
+        }
+
+        // Called if a key has been released (even in the same frame it has been released)
+        protected override void OnKeyUp(Keys KeyCode)
+        {
+        
+        }
+
+        // Called during the frame a key is pressed and in all the following frames until it's released (excluding the frame it's released)
+        protected override void OnKeyPress(Keys KeyCode)
+        {
+        
         }
 
     }
