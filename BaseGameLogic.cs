@@ -9,8 +9,6 @@ namespace RetroGameFramework
 
     /*
     
-    TODO: Documentazione
-    TODO: elapsedTime, deltaTime (in BaseGameLogic)
     TODO: random generator (in GameUtils)
     TODO: print di una immagine (matrice) 
     TODO: testi
