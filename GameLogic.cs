@@ -16,6 +16,8 @@ namespace RetroGameFramework
         float[] ballPosition; // ball position in screen pixels
         float[] ballSpeed; // ball speed in pixels per frame
 
+        int ballColor = 1;
+
         // Initialization call, used to customize GameConfig data (used to customize the engine behaviour)
         protected override void OnInitGameConfig(GameConfig GameConfig)
         {
@@ -30,7 +32,16 @@ namespace RetroGameFramework
             GameConfig.BackgroundColor = System.Drawing.Color.Black;
             //GameForm.Initializer.ForegroundColor = System.Drawing.Color.White;
             GameConfig.ForegroundColor = System.Drawing.Color.FromArgb(255, 255, 255);
-            GameConfig.AdditionalColors = new System.Drawing.Color[] { System.Drawing.Color.Yellow, System.Drawing.Color.Green };
+
+            GameConfig.AdditionalColors = new System.Drawing.Color[] {
+                System.Drawing.Color.Red,
+                System.Drawing.Color.Orange,
+                System.Drawing.Color.Yellow,
+                System.Drawing.Color.Green,
+                System.Drawing.Color.Cyan,
+                System.Drawing.Color.Blue,
+                System.Drawing.Color.Violet,
+           };
         }
 
         // Called at the start of the first frame of the game.
@@ -39,6 +50,7 @@ namespace RetroGameFramework
         {
             // set the ball in the center of the screen
             ballPosition = new float[] { pixels.GetLength(0) / 2, pixels.GetLength(1) / 2 };
+
             // give the fall a speed
             ballSpeed = new float[] { 2, 2 };
         }
@@ -47,6 +59,14 @@ namespace RetroGameFramework
         protected override void OnClear(int[,] pixels)
         {
             DrawBall(pixels, 0); // set the background color in the former ball location
+
+            for (int x = 0; x < pixels.GetLength(0); x++)
+            {
+                for (int y = 0; y < pixels.GetLength(1); y++)
+                {
+                    pixels[x, y] = 0;
+                }
+            }
         }
 
         // Called once per frame.
@@ -59,7 +79,7 @@ namespace RetroGameFramework
         // Called once per frame, AFTER the OnLoopGame event.
         protected override void OnDraw(int[,] pixels)
         {
-            DrawBall(pixels, 1); // set the foregorund color in the current ball location
+            DrawBall(pixels, ballColor); // set the foregorund color in the current ball location
         }
 
         // Called at the end of the last frame of the game.
@@ -157,6 +177,11 @@ namespace RetroGameFramework
                 else if (KeyCode == Keys.P)
                 {
                     SetPaused(true);
+                }
+                else if (KeyCode == Keys.C)
+                {
+                    ballColor++;
+                    if (ballColor >= GameConfig.AdditionalColors.Length + 2) ballColor = 2;
                 }
             }
             else
