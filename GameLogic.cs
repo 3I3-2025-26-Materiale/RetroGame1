@@ -46,10 +46,10 @@ namespace RetroGameFramework
 
         // Called at the start of the first frame of the game.
         // It's main purpose it's to setup the scene.
-        protected override void OnStartGame(int[,] pixels)
+        private void FirstFrameLoop ()
         {
             // set the ball in the center of the screen
-            ballPosition = new float[] { pixels.GetLength(0) / 2, pixels.GetLength(1) / 2 };
+            ballPosition = new float[] { GameConfig.PixelsMatrixWidth / 2, GameConfig.PixelsMatrixHeight / 2 };
 
             // give the fall a speed
             ballSpeed = new float[] { 2, 2 };
@@ -58,8 +58,6 @@ namespace RetroGameFramework
         // Called once per frame, BEFORE the OnLoopGame event.
         protected override void OnClear(int[,] pixels)
         {
-            DrawBall(pixels, 0); // set the background color in the former ball location
-
             for (int x = 0; x < pixels.GetLength(0); x++)
             {
                 for (int y = 0; y < pixels.GetLength(1); y++)
@@ -73,7 +71,14 @@ namespace RetroGameFramework
         // Here the actual logic happens.
         protected override void OnLoopGame(float deltaTime)
         {
-            UpdateBallPosition();
+            if (FrameCount == 0)
+            {
+                FirstFrameLoop();
+            }
+            else
+            {
+                UpdateBallPosition();
+            }
         }
 
         // Called once per frame, AFTER the OnLoopGame event.

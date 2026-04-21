@@ -81,7 +81,7 @@ namespace RetroGameFramework
             GameLogic._elapsedTime = 0;
             GameLogic._elapsedTimeRunning = 0;
 
-            GameLogic.StartGame(gameForm, PixelsMatrix);
+            GameLogic.EnableInput(gameForm);
             GameLogic.LoopGame(PixelsMatrix, 0);
             gameForm.Invalidate();
             gameForm.Update();
@@ -121,7 +121,8 @@ namespace RetroGameFramework
                 }
                 else
                 {
-                    GameLogic.EndGame(gameForm);
+                    GameLogic.DisableInput(gameForm);
+                    GameLogic.EndGame();
                     gameTimer.Stop();
                 }
             };
@@ -145,16 +146,9 @@ namespace RetroGameFramework
         }
         protected virtual void OnInitGameConfig(GameConfig GameConfig) { }
 
-        private void StartGame(Form gameForm, int[,] pixels)
-        {
-            EnableInput(gameForm);
-            OnStartGame(pixels);
-        }
-        protected virtual void OnStartGame(int[,] pixels) { }
-
         private void LoopGame(int[,] pixels, float deltaTime)
         {
-            OnClear(pixels);
+            OnClear(pixels);            
             OnLoopGame(deltaTime);
             OnDraw(pixels);
         }
@@ -163,10 +157,9 @@ namespace RetroGameFramework
         protected virtual void OnLoopGame(float deltaTime) { }
         protected virtual void OnDraw(int[,] pixels) { }
 
-        private void EndGame(Form gameForm)
+        private void EndGame()
         {
             OnEndGame();
-            DisableInput(gameForm);
         }
         protected virtual void OnEndGame() { }
 
