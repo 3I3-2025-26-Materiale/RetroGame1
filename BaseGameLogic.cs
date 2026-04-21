@@ -55,6 +55,7 @@ namespace RetroGameFramework
         // Returns the elapsed paused time, in seconds, from the start of the application. 
         public float ElapsedTimePaused { get { return _elapsedTime - _elapsedTimeRunning; } }
 
+        private Random _randomGenerator;
 
         // CREATE GAME MATRIX
         static void Main(string[] args)
@@ -135,6 +136,8 @@ namespace RetroGameFramework
             _pressedKeys = new List<Keys>();
             _releasedKeys = new List<Keys>();
             _prevFramePressedKeys = new List<Keys>();
+
+            _randomGenerator = GameConfig.forceRandomGeneratorSeed ? new Random(GameConfig.randomGeneratorSeed) : new Random();
         }
 
         private void InitGameConfig(GameConfig GameConfig)

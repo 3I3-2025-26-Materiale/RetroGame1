@@ -30,6 +30,8 @@ The following configurations can be retrieved through the `GameConfig` variable,
  - `string Title`: game title, shown by default in the window title bar. *Default:* `"My Retro Game"`.
  - `Keys[] KeysPriority`: order by which the keyboard events are served. KeyCodes not appearing here are served in KeyCode order, in any case after these ones. *Default:* `null`.
  - `PressReleaseRaceConditionRule PressReleaseRaceConditionPolicy`: policy deciding what happens if key pressed and released events are hit in the same frame for the same KeyCode (this happens the more often the lower the frame rate is). *Available values:* `PressWins`, `ReleaseWins`, `CallBoth`, `CallNone`. *Default:* `PressReleaseRaceConditionRule.CallBoth`.
+ - `bool forceRandomGeneratorSeed`: forces the initialization of the seed configured in `randomGeneratorSeed` when the game random generator is greated. *Default:* `false`.
+ - `int randomGeneratorSeed`: contains the seed used to initialize the game random generator if `forceRandomGeneratorSeed` is `true`. *Default:* `0`.
  
  ### The game loop events
  The API provide multiple events that are called in different moments by the engine thoughout the game execution. They are meant to be used by user code to write the custom game logic. Each event has a specific purpose and it's called in a specific moment of the game loop. **REMEMBER: These functions are already called by the engine: the game code should only complete their body to implement a custom logic.**
@@ -64,6 +66,7 @@ The following configurations can be retrieved through the `GameConfig` variable,
  
  **NOTE:** `void OnLoopGame (float deltaTime)` has an argument storing the amount time (in second) passed between each frame and the previous one. See *The game loop events* section.
  
- 
+ ### Random generator
+ The `GameLogic` class provides the reference of a random generator of the [System.Random](https://learn.microsoft.com/en-us/dotnet/api/system.random?view=netframework-4.0) class, meant to be the only random generator used in the whole game. The random generator is initialized according to the `GameConfig.forceRandomGeneratorSeed` and `GameConfig.randomGeneratorSeed` configurations. It's strongly suggested to force a fixed seed when debugging and to note the seed while noting bugs, to be able to reproduce it.
  
  

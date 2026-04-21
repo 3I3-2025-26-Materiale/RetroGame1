@@ -37,5 +37,9 @@ namespace RetroGameFramework
 
         // What happens if a key if pressed and released in the same frame?
         public PressReleaseRaceConditionRule PressReleaseRaceConditionPolicy = PressReleaseRaceConditionRule.CallBoth;
+
+        public bool forceRandomGeneratorSeed = false;
+        public int randomGeneratorSeed = 0;
+
     }
 }
