@@ -9,8 +9,6 @@ namespace RetroGameFramework
 {
     internal class GameConfig
     {
-        public Type GameLogicClass = typeof(GameLogic);
-
         public int PixelsMatrixWidth = 50;
         public int PixelsMatrixHeight = 50;
         public int PixelSize = 10;

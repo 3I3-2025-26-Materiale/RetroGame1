@@ -4,13 +4,13 @@ namespace RetroGameFramework
 {
     internal class GameLogic : BaseGameLogic
     {
-        public GameLogic() : base() { }
+        public GameLogic(GameConfig GameConfig) : base(GameConfig) { }
 
 
 
         // GAME DATA
         // Declare here game-specific data that should survive the frame
-
+        // GameConfig is already accessible in methods
         float[] ballPosition; // ball position in screen pixels
         float[] ballSpeed; // ball speed in pixels per frame
 
@@ -43,27 +43,33 @@ namespace RetroGameFramework
             ballSpeed = new float[] { 2, 2 };
         }
 
+        // Called once per frame, BEFORE the OnLoopGame event.
+        protected override void OnClear(int[,] pixels)
+        {
+            DrawBall(pixels, 0); // set the background color in the former ball location
+        }
+
         // Called once per frame.
         // Here the actual logic happens.
-        protected override void OnLoopGame(int[,] pixels)
+        protected override void OnLoopGame()
         {
-            // clear pixels where the ball currently is
-            DrawBall(pixels, 0); // set the background color where the ball currently is
+            UpdateBallPosition();
+        }
 
-            UpdateBallPosition(pixels);
-
-            // clear draw the new ball
-            DrawBall(pixels, 1); // set the foreground color where the ball is now
+        // Called once per frame, AFTER the OnLoopGame event.
+        protected override void OnDraw(int[,] pixels)
+        {
+            DrawBall(pixels, 1); // set the foregorund color in the current ball location
         }
 
         // Called at the end of the last frame of the game.
         // Its main purpose it's to dispose resources, as the game will end immediately after this call.
-        protected override void OnEndGame(int[,] pixels)
+        protected override void OnEndGame()
         {
 
         }
 
-        private void UpdateBallPosition(int[,] pixels)
+        private void UpdateBallPosition()
         {
             // Update ball's position
             ballPosition[0] += ballSpeed[0];
@@ -80,10 +86,10 @@ namespace RetroGameFramework
                 ballPosition[0] += ballRadius - ballPosition[0]; // correct the position after the bounce
                 ballSpeed[0] *= -1; // flip the speed direction
             }
-            else if (ballSpeed[0] > 0 && ballPosition[0] + ballRadius >= pixels.GetLength(0) - 1) // horizontal check to the right
+            else if (ballSpeed[0] > 0 && ballPosition[0] + ballRadius >= GameConfig.PixelsMatrixWidth - 1) // horizontal check to the right
             {
                 // if the ball is going to the right and it went outside the right screen bound,
-                ballPosition[0] -= ballPosition[0] - (pixels.GetLength(0) - 1 - ballRadius); // correct the position after the bounce
+                ballPosition[0] -= ballPosition[0] - (GameConfig.PixelsMatrixWidth - 1 - ballRadius); // correct the position after the bounce
                 ballSpeed[0] *= -1; // flip the speed direction
             }
 
@@ -93,10 +99,10 @@ namespace RetroGameFramework
                 ballPosition[1] += ballRadius - ballPosition[1]; // correct the position after the bounce
                 ballSpeed[1] *= -1; // flip the speed direction
             }
-            else if (ballSpeed[1] > 0 && ballPosition[1] + ballRadius >= pixels.GetLength(1) - 1) // vertical check to the bottom
+            else if (ballSpeed[1] > 0 && ballPosition[1] + ballRadius >= GameConfig.PixelsMatrixHeight - 1) // vertical check to the bottom
             {
                 // if the ball is going down and it went outside the bottom screen bound,
-                ballPosition[1] -= ballPosition[1] - (pixels.GetLength(1) - 1 - ballRadius); // correct the position after the bounce
+                ballPosition[1] -= ballPosition[1] - (GameConfig.PixelsMatrixHeight - 1 - ballRadius); // correct the position after the bounce
                 ballSpeed[1] *= -1; // flip the speed direction
             }
         }

@@ -5,31 +5,27 @@ namespace RetroGameFramework
 {
     internal class BaseGameLogic
     {
+        private GameConfig _gameConfig;
+        public GameConfig GameConfig { get { return _gameConfig; } }
+        
         // CREATE GAME MATRIX
         static void Main(string[] args)
         {
             GameConfig GameConfig = new GameConfig();
-
-            Type GameLogicClass = GameConfig.GameLogicClass;
-            if (GameLogicClass == null
-                || (GameLogicClass != typeof(BaseGameLogic) && !GameLogicClass.IsSubclassOf(typeof(BaseGameLogic))))
-            {
-                GameLogicClass = typeof(BaseGameLogic);
-            }
-            BaseGameLogic GameLogic = (BaseGameLogic) Activator.CreateInstance(GameLogicClass);
-
-            GameLogic.OnInitGameConfig(GameConfig);
-
-            int[,] pixels = new int[GameConfig.PixelsMatrixWidth, GameConfig.PixelsMatrixHeight];
+            BaseGameLogic GameLogic = new GameLogic(GameConfig);
+            GameLogic.InitGameConfig(GameConfig);
+            int[,] PixelsMatrix = new int[GameConfig.PixelsMatrixWidth, GameConfig.PixelsMatrixHeight];
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Form gameForm = new GameForm(GameConfig, pixels);
+            Form gameForm = new GameForm(GameConfig, PixelsMatrix);
 
             bool continueGame = true;
 
-            GameLogic.OnStartGame(pixels);
-            GameLogic.OnLoopGame(pixels);
+            GameLogic.StartGame(PixelsMatrix);
+            GameLogic.LoopGame(PixelsMatrix);
+            gameForm.Invalidate();
+            gameForm.Update();
 
             System.Windows.Forms.Timer gameTimer = new System.Windows.Forms.Timer();
             gameTimer.Interval = 1000 / GameConfig.FrameRate;
@@ -45,11 +41,11 @@ namespace RetroGameFramework
                         gameForm.Invalidate();
                         gameForm.Update();
                     }));
-                    GameLogic.OnLoopGame(pixels);
+                    GameLogic.LoopGame(PixelsMatrix);
                 }
                 else
                 {
-                    GameLogic.OnEndGame(pixels);
+                    GameLogic.EndGame();
                     gameTimer.Stop();
                 }
             };
@@ -58,18 +54,40 @@ namespace RetroGameFramework
             Application.Run(gameForm); // This runs the form with the main thread as owner
         }
 
-        public BaseGameLogic()
+        public BaseGameLogic(GameConfig GameConfig)
         {
-
+            _gameConfig = GameConfig;
         }
 
+        private void InitGameConfig(GameConfig GameConfig)
+        {
+            OnInitGameConfig(GameConfig);
+            _gameConfig = GameConfig;
+        }
         protected virtual void OnInitGameConfig(GameConfig GameConfig) { }
 
+        private void StartGame(int[,] pixels)
+        {
+            OnStartGame(pixels);
+        }
         protected virtual void OnStartGame(int[,] pixels) { }
 
-        protected virtual void OnLoopGame(int[,] pixels) { }
+        private void LoopGame(int[,] pixels)
+        {
+            OnClear(pixels);
+            OnLoopGame();
+            OnDraw(pixels);
+        }
 
-        protected virtual void OnEndGame(int[,] pixels) { }
+        protected virtual void OnClear(int[,] pixels) { }
+        protected virtual void OnLoopGame() { }
+        protected virtual void OnDraw(int[,] pixels) { }
+
+        private void EndGame()
+        {
+            OnEndGame();
+        }
+        protected virtual void OnEndGame() { }
 
     }
 }
