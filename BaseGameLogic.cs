@@ -7,7 +7,6 @@ namespace RetroGameFramework
 
     /*
     
-    TODO: print di una immagine (matrice) 
     TODO: testi
     TODO: aminations (serie di matrici, lancio animazione, loop)
 
