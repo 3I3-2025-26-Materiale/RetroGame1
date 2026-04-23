@@ -19,6 +19,27 @@ namespace RetroGameFramework
 
         int ballColor = 1;
 
+        GameImage ballImage = new GameImage(new int[,] {
+            { 0, 1, 0},
+            { 1, 1, 1},
+            { 1, 1, 0}
+        }, AnchorType.Center);
+        PaintStyle ballStyle = PaintStyle.Default;
+
+        GameImage starImage = new GameImage(new int[,] {
+            { 0,0,0,0,0,1,0,0,0,0,0 },
+            { 0,0,0,0,0,1,0,0,0,0,0 },
+            { 0,0,0,0,1,1,1,0,0,0,0 },
+            { 1,1,1,1,1,1,1,1,1,1,1 },
+            { 0,0,1,1,1,1,1,1,1,0,0 },
+            { 0,0,0,1,1,1,1,1,0,0,0 },
+            { 0,0,0,1,1,1,1,1,0,0,0 },
+            { 0,0,1,1,0,0,0,1,1,0,0 },
+            { 0,0,1,0,0,0,0,0,1,0,0 }
+        }, AnchorType.Center);
+        PaintStyle starStyle = PaintStyle.Default;
+
+
         // Initialization call, used to customize GameConfig data (used to customize the engine behaviour)
         protected override void OnInitGameConfig(GameConfig GameConfig)
         {
@@ -54,18 +75,14 @@ namespace RetroGameFramework
 
             // give the fall a speed
             ballSpeed = new float[] { 2, 2 };
+
+            ballStyle.SetColorRemap(1, 2); // start from first additional color;
         }
 
         // Called once per frame, BEFORE the OnLoopGame event.
         protected override void OnClear(int[,] pixels)
         {
-            for (int x = 0; x < pixels.GetLength(0); x++)
-            {
-                for (int y = 0; y < pixels.GetLength(1); y++)
-                {
-                    pixels[x, y] = 0;
-                }
-            }
+            GameUtils.ClearScreen(pixels);
         }
 
         // Called once per frame.
@@ -85,7 +102,18 @@ namespace RetroGameFramework
         // Called once per frame, AFTER the OnLoopGame event.
         protected override void OnDraw(int[,] pixels)
         {
+            int screenWidth = pixels.GetLength(0);
+            int screenHeight = pixels.GetLength(1);
+
+            // Draw the background star images at the center of the screen
+            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.25), (int)(screenHeight * 0.25)), starStyle);
+            //GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.75), (int)(screenHeight * 0.25)), starStyle);
+            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.50), (int)(screenHeight * 0.50)), starStyle);
+            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.25), (int)(screenHeight * 0.75)), starStyle);
+            //GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.75), (int)(screenHeight * 0.75)), starStyle);
+
             DrawBall(pixels, ballColor); // set the foregorund color in the current ball location
+            // GameUtils.DrawImageOnScreen(pixels, ballImage, new Point((int)ballPosition[0], (int)ballPosition[1]), ballStyle);
         }
 
         // Called at the end of the last frame of the game.
@@ -189,6 +217,12 @@ namespace RetroGameFramework
                 }
                 else if (KeyCode == Keys.C)
                 {
+                    int tmpColor = ballStyle.GetRemappedColor(PaintStyle.FOREGROUND_COLOR_INDEX);
+                    tmpColor++;
+                    if (tmpColor >= GameConfig.AdditionalColors.Length + 2)
+                        tmpColor = 2;
+                    ballStyle.SetColorRemap(PaintStyle.FOREGROUND_COLOR_INDEX, tmpColor);
+
                     ballColor++;
                     if (ballColor >= GameConfig.AdditionalColors.Length + 2)
                         ballColor = 2;

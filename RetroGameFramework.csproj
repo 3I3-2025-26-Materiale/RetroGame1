@@ -52,6 +52,7 @@
     </Compile>
     <Compile Include="BaseGameLogic.cs" />
     <Compile Include="GameLogic.cs" />
+    <Compile Include="GameUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
