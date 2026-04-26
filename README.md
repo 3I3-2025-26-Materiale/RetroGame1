@@ -5,9 +5,47 @@ The pixel matrix is an integer matrix, whose values correspond to color indices.
  - `0` is the index of the background color.
  - `1` is the index of the foreground color. These two colors are the minimum required for the game.
  - Additional colors have indices starting from `2`.
- - The pixels matrix size is given in game pixels, but each game pixel can have a screen size greater than 1. If game pixels size is greater than 1, each game pixel will be painted as a flat-colored square.
+ - The pixels matrix size is given in game pixels, but each game pixel can have a screen size greater than 1, to enhance the old-school feeling of the game making the game more "pixeled". If game pixels size is greater than 1, each game pixel will be painted as a flat-colored square.
  - The window size is computed multipling the pixels matrix size by the pixes size.
  - The pixels matrix is given as argument to the `OnClear` and `OnDraw` events. Any other logic method (such as the `GameLoop` event logic) will have to live without accessing the matrix.
+ 
+ ### Transposed matrix
+ 
+ In memory, the pixels matrix is transposed. When an image matrix is transposed, the image rows correspond to matrix columns, while the first image pixel and the first matrix pixel will both be at the top-left angle. In this situation, moving along the a row of an image will correspond with iterating the element of a matrix column, the image width will correspond with the matrix first dimension, and the image height with the matrix second dimensions. Otherwise, if the image matrix is not transposed, their dimensions have to be swapped every time it's used, accessing matrix pixels before by its Y screen coordinate, then by X.
+ 
+ So, for ease of use, the screen matrix is trasposed in memory. If all pixel matrices used in the game's code are transposed in memory, they will be oriented according to the screen matrix, so they can be drawn on screen and composed one with the other without any other concern.
+
+```
+Screen matrix example | Transposed matrix in memory
+                      |
+ 00 01 02 03 04 05    |  00 10 20 30 40
+ 10 11 12 13 14 15    |  01 11 21 31 41
+ 20 21 22 23 24 25    |  02 12 22 32 42
+ 30 31 32 33 34 35    |  03 13 23 33 43
+ 40 41 42 43 44 45    |  04 14 24 34 44
+                      |  05 15 25 35 45
+					  |
+ Let's consider a coordinate system with origin in
+ the top-left angle, an X axis pointing right, and
+ a Y axis pointing down:
+ 
+ O ---->  If we try to retrieve the pixel at known
+ |     X  coordinates P(x,y), with the first matrix
+ |        the pixel will be retrieved as m[y, x],
+ |        but after transposition it will be retrieved
+ v Y      as m[x, y]. Also, in the screen-oriented
+          matrix, the width is the number of columns,
+and the height is the number of rows, while, after
+transposition, the width will correspond to the number
+of rows and the height to the number of columns.
+The usage of the transposed matrix is much more
+user-friendly.
+
+```
+
+### Colors
+
+The matrix elements are the pixel colors, each identified by its index in the color array. The background color's index is 0 and the foreground color's index is 1. Additional colors start fron index 2. By design, the maximum number of colors for the game is 256. Each color can still be defined in Truecolor space, as a 24 bit color (8 bit red, 8 bit green, 8 bit blue). It's up to the programmer how to correctly handle the additional colors starting from 2 in their game-logic.
 
 ## The `GameLogic` class
 The `GameLogic` subclass exists to implement the custom game code. It can be used to read `GameConfig` data and to write the game events code.
@@ -66,7 +104,8 @@ The following configurations can be retrieved through the `GameConfig` variable,
  
  **NOTE:** `void OnLoopGame (float deltaTime)` has an argument storing the amount time (in second) passed between each frame and the previous one. See *The game loop events* section.
  
- ### Random generator
- The `GameLogic` class provides the reference of a random generator of the [System.Random](https://learn.microsoft.com/en-us/dotnet/api/system.random?view=netframework-4.0) class, meant to be the only random generator used in the whole game. The random generator is initialized according to the `GameConfig.forceRandomGeneratorSeed` and `GameConfig.randomGeneratorSeed` configurations. It's strongly suggested to force a fixed seed when debugging and to note the seed while noting bugs, to be able to reproduce it.
+ ### Random numbers generator
+ The `GameLogic` class provides the reference of a random generator of the [System.Random](https://learn.microsoft.com/en-us/dotnet/api/system.random?view=netframework-4.0) class, meant to be the only random generator used in the whole game. The random generator is available in the scope all functions using the property `RandomGenerator`, but only after the `OnInitGameConfig` event has been called, otherwise `null` is returned. The random generator is initialized according to the `GameConfig.forceRandomGeneratorSeed` and `GameConfig.randomGeneratorSeed` configurations. It's strongly suggested to force a fixed seed when debugging and to note the seed while noting bugs, to be able to reproduce it.
  
+ ### Image handling
  
