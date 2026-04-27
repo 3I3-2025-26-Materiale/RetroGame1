@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Media.Media3D;
 
 namespace RetroGameFramework
 {
@@ -14,75 +15,34 @@ namespace RetroGameFramework
 
         // GAME DATA
         // Declare here game-specific data that should survive the frame
-        float[] ballPosition; // ball position in screen pixels (float to consider also half pixels)
-        float[] ballSpeed; // ball speed in pixels per frame (float to consider also half pixels)
 
-        int ballColor = 1;
+        static int point_x = 0;
+        static int point_y = 0;
 
-        GameImage ballImage = new GameImage(new int[,] {
-            { 0, 1, 0},
-            { 1, 1, 1},
-            { 1, 1, 0}
-        }, AnchorType.Center);
-        PaintStyle ballStyle = PaintStyle.Default;
-
-        GameImage starImage = new GameImage(new int[,] {
-            { 0,0,0,0,0,1,0,0,0,0,0 },
-            { 0,0,0,0,0,1,0,0,0,0,0 },
-            { 0,0,0,0,1,1,1,0,0,0,0 },
-            { 1,1,1,1,1,1,1,1,1,1,1 },
-            { 0,0,1,1,1,1,1,1,1,0,0 },
-            { 0,0,0,1,1,1,1,1,0,0,0 },
-            { 0,0,0,1,1,1,1,1,0,0,0 },
-            { 0,0,1,1,0,0,0,1,1,0,0 },
-            { 0,0,1,0,0,0,0,0,1,0,0 }
-        }, AnchorType.Center);
-        PaintStyle starStyle = PaintStyle.Default;
-
+        static int point_mov_x = 0;
+        static int point_mov_y = 0;
 
         // Initialization call, used to customize GameConfig data (used to customize the engine behaviour)
         protected override void OnInitGameConfig(GameConfig GameConfig)
         {
-            GameConfig.Title = "Bouncing Ball";
+            GameConfig.Title = "Demo Game";
 
-            GameConfig.PixelsMatrixWidth = 64;
-            GameConfig.PixelsMatrixHeight = 48;
-            GameConfig.PixelSize = 10;
+            GameConfig.PixelsMatrixWidth = 128;
+            GameConfig.PixelsMatrixHeight = 96;
+            GameConfig.PixelSize = 5;
 
-            GameConfig.FrameRate = 12;
-
-            GameConfig.BackgroundColor = System.Drawing.Color.Black;
-            //GameForm.Initializer.ForegroundColor = System.Drawing.Color.White;
-            GameConfig.ForegroundColor = System.Drawing.Color.FromArgb(255, 255, 255);
-
-            GameConfig.AdditionalColors = new System.Drawing.Color[] {
-                System.Drawing.Color.Red,
-                System.Drawing.Color.Orange,
-                System.Drawing.Color.Yellow,
-                System.Drawing.Color.Green,
-                System.Drawing.Color.Cyan,
-                System.Drawing.Color.Blue,
-                System.Drawing.Color.Violet,
-           };
-        }
-
-        // Called at the start of the first frame of the game.
-        // It's main purpose it's to setup the scene.
-        private void FirstFrameLoop ()
-        {
-            // set the ball in the center of the screen
-            ballPosition = new float[] { GameConfig.PixelsMatrixWidth / 2, GameConfig.PixelsMatrixHeight / 2 };
-
-            // give the fall a speed
-            ballSpeed = new float[] { 2, 2 };
-
-            ballStyle.SetColorRemap(1, 2); // start from first additional color;
         }
 
         // Called once per frame, BEFORE the OnLoopGame event.
         protected override void OnClear(int[,] pixels)
         {
-            GameUtils.ClearScreen(pixels);
+            for (int x = 0; x < pixels.GetLength(0); x++)
+            {
+                for (int y = 0;  y < pixels.GetLength(1); y++)
+                {
+                    pixels[x, y] = 0;
+                }
+            }
         }
 
         // Called once per frame.
@@ -91,31 +51,52 @@ namespace RetroGameFramework
         {
             if (FrameCount == 0)
             {
-                FirstFrameLoop();
+                point_x = GameConfig.PixelsMatrixWidth / 2;
+                point_y = GameConfig.PixelsMatrixHeight / 2;
+
+                point_mov_x = 1;
+                point_mov_y = 1;
             }
             else
             {
-                UpdateBallPosition();
+                if (point_mov_x > 0 && point_x >= GameConfig.PixelsMatrixWidth - 1)
+                {
+                    point_mov_x *= -1;
+                }
+                else if (point_mov_x < 0 && point_x <= 0)
+                {
+                    point_mov_x *= -1;
+                }
+
+                if (point_mov_y > 0 && point_y >= GameConfig.PixelsMatrixHeight - 1)
+                {
+                    point_mov_y *= -1;
+                }
+                else if (point_mov_y < 0 && point_y <= 0)
+                {
+                    point_mov_y *= -1;
+                }
+
+                point_x += point_mov_x;
+                point_y += point_mov_y;
+
+                
             }
         }
 
         // Called once per frame, AFTER the OnLoopGame event.
         protected override void OnDraw(int[,] pixels)
         {
-            int screenWidth = pixels.GetLength(0);
-            int screenHeight = pixels.GetLength(1);
+            int width = pixels.GetLength(0);
+            int height = pixels.GetLength(1);
 
-            // Draw the background star images at the center of the screen
-            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.25), (int)(screenHeight * 0.25)), starStyle);
-            //GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.75), (int)(screenHeight * 0.25)), starStyle);
-            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.50), (int)(screenHeight * 0.50)), starStyle);
-            GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.25), (int)(screenHeight * 0.75)), starStyle);
-            //GameUtils.DrawImageOnScreen(pixels, starImage, new Point((int)(screenWidth * 0.75), (int)(screenHeight * 0.75)), starStyle);
-
-            DrawBall(pixels, ballColor); // set the foregorund color in the current ball location
-            // GameUtils.DrawImageOnScreen(pixels, ballImage, new Point((int)ballPosition[0], (int)ballPosition[1]), ballStyle);
+            if (point_x >= 0 && point_x < width
+                && point_y >= 0 && point_y < height)
+            {
+                pixels[point_x, point_y] = 1;
+            }
         }
-
+        
         // Called at the end of the last frame of the game.
         // Its main purpose it's to dispose resources, as the game will end immediately after this call.
         protected override void OnEndGame()
@@ -125,115 +106,36 @@ namespace RetroGameFramework
 
         private void UpdateBallPosition()
         {
-            // Update ball's position
-            ballPosition[0] += ballSpeed[0];
-            ballPosition[1] += ballSpeed[1];
-
-            // Check hits with screen bounds to make the ball bounce
-            // The bounce is cheched with a margin to consider the ball dimension
-            // In the collision checkings, the radius is always reduced by 0.5 beceuse the center pixel should not be computed.
-
-            float ballRadius = 1.5f;
-
-            if (ballSpeed[0] < 0 && ballPosition[0] - (ballRadius - 0.5f) <= 0) // horizontal check to the left
-            {
-                // if the ball is going to the left and it went outside the left screen bound,
-                ballPosition[0] += (ballRadius - 0.5f) - ballPosition[0]; // correct the position after the bounce
-                ballSpeed[0] *= -1; // flip the speed direction
-            }
-            else if (ballSpeed[0] > 0 && ballPosition[0] + (ballRadius - 0.5) >= GameConfig.PixelsMatrixWidth - 1) // horizontal check to the right
-            {
-                // if the ball is going to the right and it went outside the right screen bound,
-                ballPosition[0] -= ballPosition[0] - (GameConfig.PixelsMatrixWidth - 1 - (ballRadius - 0.5f)); // correct the position after the bounce
-                ballSpeed[0] *= -1; // flip the speed direction
-            }
-
-            if (ballSpeed[1] < 0 && ballPosition[1] - (ballRadius - 0.5f) <= 0) // vertical check to the top
-            {
-                // if the ball is going up and it went outside the top screen bound,
-                ballPosition[1] += (ballRadius - 0.5f) - ballPosition[1]; // correct the position after the bounce
-                ballSpeed[1] *= -1; // flip the speed direction
-            }
-            else if (ballSpeed[1] > 0 && ballPosition[1] + (ballRadius - 0.5f) >= GameConfig.PixelsMatrixHeight - 1) // vertical check to the bottom
-            {
-                // if the ball is going down and it went outside the bottom screen bound,
-                ballPosition[1] -= ballPosition[1] - (GameConfig.PixelsMatrixHeight - 1 - (ballRadius - 0.5f)); // correct the position after the bounce
-                ballSpeed[1] *= -1; // flip the speed direction
-            }
+            
         }
 
         private void DrawBall(int[,] pixels, int color)
         {
-            // BALL EXAMPLE:     1  
-            //                  234 
-            //                  65  
-
-            DrawPixel(pixels, ballPosition[0] - 1,  ballPosition[1],        color);  // 1
-            DrawPixel(pixels, ballPosition[0],      ballPosition[1] - 1,    color);  // 2
-            DrawPixel(pixels, ballPosition[0],      ballPosition[1],        color);  // 3
-            DrawPixel(pixels, ballPosition[0],      ballPosition[1] + 1,    color);  // 4
-            DrawPixel(pixels, ballPosition[0] + 1,  ballPosition[1],        color);  // 5
-            DrawPixel(pixels, ballPosition[0] - 1,  ballPosition[1] + 1,    color);  // 6
-        }
-
-        private static void DrawPixel(int[,] pixels, float x, float y, int color)
-        {
-            int posX = (int)x;
-            int posY = (int)y;
-
-            if (posX >= 0 && posX < pixels.GetLength(0)
-                && posY >= 0 && posY < pixels.GetLength(1))
-            {
-                // X coordinate is the column index, while Y coordinate is the row index
-                pixels[posX, posY] = color;
-            }
+            
         }
 
         // Called the first frame a key is pressed, and not called anymore unless the key is released
         protected override void OnKeyDown(Keys KeyCode)
         {
-            if (!IsPaused())
+            if (KeyCode == Keys.Up)
             {
-                float[] ballSpeedAbs = new float[] { Math.Abs(ballSpeed[0]), Math.Abs(ballSpeed[1]) };
-                if (KeyCode == Keys.Up || KeyCode == Keys.W)
-                {
-                    ballSpeed[1] = -ballSpeedAbs[1];
-                }
-                else if (KeyCode == Keys.Down || KeyCode == Keys.S)
-                {
-                    ballSpeed[1] = ballSpeedAbs[1];
-                }
-                else if (KeyCode == Keys.Right || KeyCode == Keys.D)
-                {
-                    ballSpeed[0] = ballSpeedAbs[0];
-                }
-                else if (KeyCode == Keys.Left || KeyCode == Keys.A)
-                {
-                    ballSpeed[0] = -ballSpeedAbs[0];
-                }
-                else if (KeyCode == Keys.P)
-                {
-                    SetPaused(true);
-                }
-                else if (KeyCode == Keys.C)
-                {
-                    int tmpColor = ballStyle.GetRemappedColor(PaintStyle.FOREGROUND_COLOR_INDEX);
-                    tmpColor++;
-                    if (tmpColor >= GameConfig.AdditionalColors.Length + 2)
-                        tmpColor = 2;
-                    ballStyle.SetColorRemap(PaintStyle.FOREGROUND_COLOR_INDEX, tmpColor);
-
-                    ballColor++;
-                    if (ballColor >= GameConfig.AdditionalColors.Length + 2)
-                        ballColor = 2;
-                }
+                point_mov_y = -1;
             }
-            else
+            else if (KeyCode == Keys.Down)
             {
-                if (KeyCode == Keys.P)
-                {
-                    SetPaused(false);
-                }
+                point_mov_y = 1;
+            }
+            else if (KeyCode == Keys.Left)
+            {
+                point_mov_y = -1;
+            }
+            else if (KeyCode == Keys.Right)
+            {
+                point_mov_y = 1;
+            }
+            else if (KeyCode == Keys.P)
+            {
+                SetPaused(!IsPaused());
             }
         }
 
